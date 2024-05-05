@@ -1,4 +1,4 @@
-# Practical Project Proposal -  A System Translating H&E Images to IHC Images Based on Diffusion Model
+# Practical Proposal: Breast Cancer Immunohistochemical Image Generation
 
 **Group Member**
 
@@ -10,36 +10,53 @@ Yuchen Li
 
 ## Introduction
 
-Breast cancer continues to be a prominent cause of global female mortality. Efficacious treatment plans and precise diagnoses pivot critically on the comprehensive evaluation of histopathological images, specifically, Hematoxylin and Eosin (H&E) and Immunohistochemistry (IHC) stained slices. To enhance our approach in this crucial area, our project proposes to develop a system capable of translating H&E images into IHC images, harnessing the capacity of diffusion models. With this endeavor, we try to improve the current narrative around breast cancer diagnosis and treatment planning.
+Breast cancer continues to be a prominent cause of global female mortality. Efficacious treatment plans and precise diagnoses pivot critically on the comprehensive evaluation of histopathological images, specifically, Hematoxylin and Eosin (HE) and Immunohistochemistry (IHC) stained slices, as is shown in Figure 1. [1]
+
+<div align="center"><img src="https://rumc-gcorg-p-public.s3.amazonaws.com/i/2022/06/27/wsiexamples.png" alt="img" style="zoom:50%;"/></div>
+
+Nevertheless, there exist specific constraints when evaluating the degree of HER2 expression through IHC technology. The process of preparing IHC-stained sections is costly. Tumors demonstrate heterogeneity, yet IHC staining typically occurs on a single pathological section in clinical settings, potentially inadequately representing the tumor's condition [1].
+
+In order to enhance breast cancer diagnosis, we propose to train a deep-learning model, capable of image-to-image translation between HE domain and IHC domain. Subsequently, we aim to develop user-friendly software leveraging this model, facilitating seamless integration into clinical practice.
 
 ## Related Work
 
-Broad research advancements in the realm of breast cancer diagnostics have harnessed the utility of Hematoxylin and Eosin (H&E) and Immunohistochemistry (IHC) stained images. A study in this context includes "Breast Cancer Immunohistochemical Image Generation: a Benchmark Dataset and Challenge Review," which emphasizes the potential of transforming H&E images into IHC counterparts, optimizing HER2 expression evaluation in diagnostics .
+Broad research advancements in the realm of breast cancer diagnostics have harnessed the utility of Hematoxylin and Eosin (HE) and Immunohistochemistry (IHC) stained images. Zhu et al. summarized the participant models in [2] and presented further analysis for each model. 
 
-In the field of medical imaging, analogous generative models are employed extensively to synthesize anatomical images and augment data sets for diagnostic algorithm training. For instance, studies like "Diffusion Models for Medical Image Synthesis" have demonstrated the successful replication of intricate tissue textures and staining patterns, typical of pathological images .
+Team arptidec5 leveraged Pyramid Pix2pix model, which is a type of conditional generative adversarial network (GAN). They extended the Pix2Pix framework by introducing a hierarchical architecture to improve the quality and fidelity of image translation tasks. The organizers of the challenge firstly applied this model to BCI analysis in one of their previous work [3]. 
 
-Leveraging insights from these pivotal works, our project centers on the use of diffusion models for the purpose of translating H&E images directly into their IHC iterations.
+Team Just4Fun's solution was constructed utilizing the architecture of GAN. They employed an encoder derived from BCIStainer to extract features from HE images for classification purposes. The classification outcome serves as guidance for the generator within the framework.
+
+Team lifangda02 implemented the resnet-9-blocks generator in their solution, incorporating an innovative paired InfoNCE contrastive loss, which extends the InfoNCE loss. In this approach, an output patch serves as the query, with the corresponding Immunohistochemistry (IHC)-stained patch designated as the positive sample, while non-corresponding patches are designated as negatives.
+
+
+
+Leveraging insights from these pivotal works, our project centers on the use of diffusion models for the purpose of translating HE images directly into their IHC iterations.
 
 ## Dataset
 
-Our project proposes to harness the Breast Cancer Immunohistochemical (BCI) benchmark, aiming to synthesize IHC data from paired Hematoxylin and Eosin (H&E) stained images. The BCI dataset provides a pool of 9,746 images (4,873 pairs), partitioned into 3,896 training pairs and 977 testing pairs. This diverse collection captures various HER2 expression levels, ensuring adaptability and broad applicability of our model in breast cancer diagnostics.
+The official Breast Cancer Immunohistochemical (BCI) dataset for this challenge is presented in [2]. The BCI dataset provides a pool of 9,746 images (4,873 pairs), partitioned into 3,896 training pairs and 977 testing pairs. This diverse collection captures various HER2 expression levels, ensuring adaptability and broad applicability of our model in breast cancer diagnostics.
 
 ## Objectives
 
-1. Develop a diffusion model capable of generating high-fidelity IHC images.
-2. Validate the accuracy of the model against existing datasets of IHC images.
-3. Implement a user-friendly interface for users to utilize the generated images.
+We propose our project objectives in following two aspects:
 
-## -- Design
++ Software engineering:
+  - User-friendly graphical user interface (GUI).
+  - Requirement engineering (e.g. Support environments without (a powerful) GPU).
+  - Good usability in software testing.
++ Model:
+  + Implementation of valid model(s).
+  + High scores in evaluation with benchmark provided officially in [2].
 
-1. Upload H&E image.
-2. Preprocess the image in backend.
-3. Translate to IHC image by model inference.
-4. Show the image and provide download option.
+## Proposed activities
 
-## Time Schedule
+### Task distribution
 
-1. milestone on 14.05: Dataset prepared, software system and methodology determined.
+
+
+### Timeline
+
+1. milestone on 14.05: software system and methodology determined.
 2. milestone on 04.06: Methodology designed.
 3. milestone on 11.06: Software system designed, intermediate results displayed.
 4. milestone on 24.06: Draft final report handed.
@@ -47,6 +64,8 @@ Our project proposes to harness the Breast Cancer Immunohistochemical (BCI) benc
 
 ## Reference
 
-1. Zhu, C., Liu, S., Yu Z., Xu, F., Aggarwal, A., Corredor, G., Madabhushi, A., Qu, Q., Fan, H., Li, F., Li, Y., Guan, X., Zhang, Y., Singh, V. K., Akram, F., Sarker, M. M. K., Shi, Z. & Jin, M. (2023). Breast Cancer Immunohistochemical Image Generation: A Benchmark Dataset and Challenge Review. https://arxiv.org/abs/2305.03546 
+[1] "Breast Cancer Immunohistochemical Image Generation Challenge." grand-challenge.org. https://bci.grand-challenge.org/ (accessed May. 1, 2024)
 
-2. Kazerouni, A., Aghdam, E. K., Heidari, M., Azad, R., Fayyaz, M., Hacihaliloglu, I., & Merhof, D. (2023). Diffusion models in medical imaging: A comprehensive survey. Medical Image Analysis, 88, 102846. https://doi.org/10.1016/j.media.2023.102846
+[2] Zhu et al. "Breast Cancer Immunohistochemical Image Generation: a Benchmark Dataset and Challenge Review." *arXiv preprint arXiv:2305.03546* (2023).
+
+[3] Liu et al. "Bci: Breast cancer immunohistochemical image generation through pyramid pix2pix." In *Proceedings of the IEEE/CVF conference on computer vision and pattern recognition*, pp. 1815-1824. 2022.
