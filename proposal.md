@@ -30,7 +30,7 @@ Team lifangda02 implemented the resnet-9-blocks generator in their solution, inc
 
 Team stan9 used a weakly supervised deep generative network called WeCREST. Their method involves a multi-class discriminator to distinguish between real and synthetic image styles, and incorporates a classifier that operates on the discriminator to sort images based on the HER2 expression status, labeled according to the corresponding IHC stained images.
 
-Leveraging insights from these pivotal works, our project centers on the use of diffusion models for the purpose of translating HE images directly into their IHC iterations.
+Team vived23 employed conditional generative adversarial network (cGAN) based on the paired images. They applied the discrete wavelet transform to extract 4 chennels of spitial and frequency domain features from HE images.
 
 ## Dataset
 
@@ -50,15 +50,22 @@ We propose our project objectives in following two aspects:
 
 ## Proposed activities
 
-### Task distribution
-
 ### Timeline
 
-1. milestone on 14.05: software system and methodology determined.
-2. milestone on 04.06: Methodology designed.
-3. milestone on 11.06: Software system designed, intermediate results displayed.
-4. milestone on 24.06: Draft final report handed.
-5. milestone on 23.07: Final report and code handed.
+| Task                    | Date          |
+| ----------------------- | ------------- |
+| Literature review       | 6-16 May      |
+| Methodology design      | 17-21 May     |
+| Model implementation    | 22 May-2 Jun  |
+| Training and validation | 3-28 Jun      |
+| Software development    | 22 May-21 Jun |
+| Testing                 | 22-28 Jun     |
+| Report                  | 27 Jun-2 Jul  |
+
+The Gantt chart below shows the proposed workflow of our team.
+
+<div align="center"><img src="timeline_gantt.jpg" alt="img" style="zoom:30%;"/></div>
+
 
 ## Reference
 
