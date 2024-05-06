@@ -20,15 +20,15 @@ In order to enhance breast cancer diagnosis, we propose to train a deep-learning
 
 ## Related Work
 
-Broad research advancements in the realm of breast cancer diagnostics have harnessed the utility of Hematoxylin and Eosin (HE) and Immunohistochemistry (IHC) stained images. Zhu et al. summarized the participant models in [2] and presented further analysis for each model. 
+Broad research advancements in the realm of breast cancer diagnostics have harnessed the utility of Hematoxylin and Eosin (HE) and Immunohistochemistry (IHC) stained images. Zhu et al. summarized the participant models in [2] and presented further analysis for each model.
 
-Team arptidec5 leveraged Pyramid Pix2pix model, which is a type of conditional generative adversarial network (GAN). They extended the Pix2Pix framework by introducing a hierarchical architecture to improve the quality and fidelity of image translation tasks. The organizers of the challenge firstly applied this model to BCI analysis in one of their previous work [3]. 
+Team arptidec5 leveraged Pyramid Pix2pix model, which is a type of conditional generative adversarial network (GAN). They extended the Pix2Pix framework by introducing a hierarchical architecture to improve the quality and fidelity of image translation tasks. The organizers of the challenge firstly applied this model to BCI analysis in one of their previous work [3].
 
 Team Just4Fun's solution was constructed utilizing the architecture of GAN. They employed an encoder derived from BCIStainer to extract features from HE images for classification purposes. The classification outcome serves as guidance for the generator within the framework.
 
 Team lifangda02 implemented the resnet-9-blocks generator in their solution, incorporating an innovative paired InfoNCE contrastive loss, which extends the InfoNCE loss. In this approach, an output patch serves as the query, with the corresponding Immunohistochemistry (IHC)-stained patch designated as the positive sample, while non-corresponding patches are designated as negatives.
 
-
+Team stan9 used a weakly supervised deep generative network called WeCREST. Their method involves a multi-class discriminator to distinguish between real and synthetic image styles, and incorporates a classifier that operates on the discriminator to sort images based on the HER2 expression status, labeled according to the corresponding IHC stained images.
 
 Leveraging insights from these pivotal works, our project centers on the use of diffusion models for the purpose of translating HE images directly into their IHC iterations.
 
@@ -51,8 +51,6 @@ We propose our project objectives in following two aspects:
 ## Proposed activities
 
 ### Task distribution
-
-
 
 ### Timeline
 
