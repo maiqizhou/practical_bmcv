@@ -2,11 +2,11 @@
 
 **Group Member**
 
-Xichu Yu
+Xichu Yu - Data and Computer Science
 
-Maiqi Zhou
+Maiqi Zhou - Data and Computer Science
 
-Yuchen Li
+Yuchen Li - Data and Computer Science
 
 ## Introduction
 
