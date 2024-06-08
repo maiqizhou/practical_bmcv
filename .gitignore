@@ -1,0 +1,4 @@
+__pycache__/
+data/BCI_dataset
+saved_models/
+logs/
