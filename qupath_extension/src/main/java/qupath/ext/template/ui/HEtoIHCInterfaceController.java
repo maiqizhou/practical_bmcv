@@ -7,13 +7,18 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import qupath.ext.template.HEtoIHCExtension;
 import qupath.fx.dialogs.Dialogs;
+import qupath.lib.images.servers.ImageServer;
+import qupath.lib.images.servers.ImageServerProvider;
+import qupath.ext.template.image.ImageUtils;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,7 +45,16 @@ public class HEtoIHCInterfaceController extends VBox {
 	@FXML
 	private ImageView ihcImageView;
 	
+	@FXML
+	private TextArea heImageDetailsTextArea;
+	
+	@FXML
+	private TextArea ihcImageDetailsTextArea;
+
+	
 	private File selectedHeImageFile;
+	private ImageServer<?> heImageServer;
+	private ImageServer<?> ihcImageServer;
 
 
 	/**
@@ -93,6 +107,16 @@ public class HEtoIHCInterfaceController extends VBox {
             } catch (IOException e) {
                 showAlert("Error", "Failed to load image: " + e.getMessage());
             }
+            
+            ImageServer<BufferedImage> server;
+			try {
+				server = ImageServerProvider.buildServer(selectedHeImageFile.getAbsolutePath(), BufferedImage.class);
+				heImageServer = server;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            
         }
     }
     /**
@@ -136,6 +160,30 @@ public class HEtoIHCInterfaceController extends VBox {
             showAlert("Error", "Failed to convert image: " + e.getMessage());
         }
     }
+    
+    /**
+   	 * Method to show details of the image
+   	 */
+    @FXML
+    private void showHeImageDetails(ActionEvent event) {
+        if (heImageView.getImage() != null) {
+        	String imageDetails = "HE Image:\n" + ImageUtils.getImageDetails(heImageServer);
+            heImageDetailsTextArea.setText(imageDetails);
+        } else {
+            heImageDetailsTextArea.setText("");
+        }
+    }
+
+    @FXML
+    private void showIhcImageDetails(ActionEvent event) {
+        if (ihcImageView.getImage() != null) {
+            String imageDetails = "IHC Image:\n" + ImageUtils.getImageDetails(heImageServer);
+            ihcImageDetailsTextArea.setText(imageDetails);
+        } else {
+            ihcImageDetailsTextArea.setText("No IHC image to show details.");
+        }
+    }
+    
 
     public void showAlert(String title, String message) {
         Alert alert = new Alert(AlertType.ERROR);

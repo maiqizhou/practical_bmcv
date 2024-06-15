@@ -5,6 +5,9 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextArea?>
+
+
 <?import javafx.scene.control.SpinnerValueFactory?>
 
 <fx:root type="VBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1">   
@@ -13,9 +16,13 @@
     <HBox spacing="10">
         <VBox>
             <ImageView fx:id="heImageView" fitHeight="300" fitWidth="300" preserveRatio="true"/>
+        	<Button fx:id="heShowImageDetails" text="Show the Details" onAction="#showHeImageDetails"/>
+       		<TextArea fx:id="heImageDetailsTextArea" editable="false" />
         </VBox>
         <VBox>
             <ImageView fx:id="ihcImageView" fitHeight="300" fitWidth="300" preserveRatio="true"/>
+            <Button fx:id="ihcShowImageDetails" text="Show the Details" onAction="#showIhcImageDetails"/>
+        	<TextArea fx:id="ihcImageDetailsTextArea" editable="false" />
         </VBox>
     </HBox><Spinner fx:id="threadSpinner" />
 </fx:root>

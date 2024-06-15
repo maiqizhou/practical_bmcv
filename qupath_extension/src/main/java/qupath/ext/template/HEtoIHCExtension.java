@@ -153,7 +153,7 @@ public class HEtoIHCExtension implements QuPathExtension, GitHubProject {
 	 */
 	private void addMenuItem(QuPathGUI qupath) {
 		var menu = qupath.getMenu("Extensions>" + EXTENSION_NAME, true);
-		MenuItem menuItem = new MenuItem("My menu item");
+		MenuItem menuItem = new MenuItem("Transfer HE to IHC image");
 		menuItem.setOnAction(e -> createStage());
 		menuItem.disableProperty().bind(enableExtensionProperty.not());
 		menu.getItems().add(menuItem);
