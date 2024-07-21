@@ -5,17 +5,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import qupath.ext.template.HEtoIHCExtension;
-import qupath.fx.dialogs.Dialogs;
 import qupath.lib.images.servers.ImageServer;
 import qupath.lib.images.servers.ImageServerProvider;
+import qupath.lib.regions.RegionRequest;
 import qupath.ext.template.image.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -30,14 +27,6 @@ import java.util.ResourceBundle;
 public class HEtoIHCInterfaceController extends VBox {
 	private static final ResourceBundle resources = ResourceBundle.getBundle("qupath.ext.template.ui.strings");
 
-	@FXML
-	public Spinner<Integer> threadSpinner;
-
-	@FXML
-	public void initialize() {
-		SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1);
-		threadSpinner.setValueFactory(valueFactory);
-	}
 
 	@FXML
 	private ImageView heImageView;
@@ -51,10 +40,10 @@ public class HEtoIHCInterfaceController extends VBox {
 	@FXML
 	private TextArea ihcImageDetailsTextArea;
 
-	
+	private ImageServer<BufferedImage> heImageServer;
+	private ImageServer<BufferedImage> ihcImageServer;
+
 	private File selectedHeImageFile;
-	private ImageServer<?> heImageServer;
-	private ImageServer<?> ihcImageServer;
 
 
 	/**
@@ -80,11 +69,11 @@ public class HEtoIHCInterfaceController extends VBox {
 		loader.load();
 
 		// Bind the spinner value to the number of threads property in DemoExtension
-		threadSpinner.getValueFactory().valueProperty().bindBidirectional(HEtoIHCExtension.numThreadsProperty());
-		threadSpinner.getValueFactory().valueProperty().addListener((observableValue, oldValue, newValue) -> {
-			Dialogs.showInfoNotification(resources.getString("title"),
-					String.format(resources.getString("threads"), newValue));
-		});
+//		threadSpinner.getValueFactory().valueProperty().bindBidirectional(HEtoIHCExtension.numThreadsProperty());
+//		threadSpinner.getValueFactory().valueProperty().addListener((observableValue, oldValue, newValue) -> {
+//			Dialogs.showInfoNotification(resources.getString("title"),
+//					String.format(resources.getString("threads"), newValue));
+//		});
 	}
 
 
@@ -113,7 +102,7 @@ public class HEtoIHCInterfaceController extends VBox {
 				server = ImageServerProvider.buildServer(selectedHeImageFile.getAbsolutePath(), BufferedImage.class);
 				heImageServer = server;
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
             
@@ -123,7 +112,7 @@ public class HEtoIHCInterfaceController extends VBox {
 	 * Method to convert image
 	 */
     @FXML
-    private void handleConvertImage(ActionEvent event) {
+	private void handleConvertImage(ActionEvent event) {
         if (selectedHeImageFile != null) {
             convertToIHC(selectedHeImageFile);
         } else {
@@ -153,6 +142,14 @@ public class HEtoIHCInterfaceController extends VBox {
                     Image ihcImage = new Image(fileInputStream);
                     ihcImageView.setImage(ihcImage);
                 }
+                try {
+                    ihcImageServer = ImageServerProvider.buildServer(ihcImageFile.getAbsolutePath(), BufferedImage.class); 
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                
+                
             } else {
                 showAlert("Error", "Converted IHC image not found");
             }
@@ -177,12 +174,61 @@ public class HEtoIHCInterfaceController extends VBox {
     @FXML
     private void showIhcImageDetails(ActionEvent event) {
         if (ihcImageView.getImage() != null) {
-            String imageDetails = "IHC Image:\n" + ImageUtils.getImageDetails(heImageServer);
+            String imageDetails = "IHC Image:\n" + ImageUtils.getImageDetails(ihcImageServer);
             ihcImageDetailsTextArea.setText(imageDetails);
         } else {
             ihcImageDetailsTextArea.setText("No IHC image to show details.");
         }
     }
+    
+    @SuppressWarnings("deprecation")
+	@FXML
+    private void handleDownloadHeImage(ActionEvent event) {
+        if (heImageServer == null) {
+            showAlert("Error", "No HE image loaded to save.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Image");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PNG", "*.png"));
+        File file = fileChooser.showSaveDialog(null);
+
+        if (file != null) {
+            try {
+                BufferedImage image = heImageServer.readBufferedImage(RegionRequest.createInstance(heImageServer.getPath(), 1, 0, 0, heImageServer.getWidth(), heImageServer.getHeight()));
+                ImageUtils.saveImageToFile(image, file.getAbsolutePath());
+            } catch (IOException e) {
+                showAlert("Error", "Failed to save image: " + e.getMessage());
+            }
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+	@FXML
+    private void handleDownloadIhcImage(ActionEvent event) {
+        if (ihcImageServer == null) {
+            showAlert("Error", "No IHC image loaded to save.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Image");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PNG", "*.png"));
+        File file = fileChooser.showSaveDialog(null);
+
+        if (file != null) {
+            try {
+                BufferedImage image = ihcImageServer.readBufferedImage(RegionRequest.createInstance(ihcImageServer.getPath(), 1, 0, 0, ihcImageServer.getWidth(), ihcImageServer.getHeight()));
+                ImageUtils.saveImageToFile(image, file.getAbsolutePath());
+            } catch (IOException e) {
+                showAlert("Error", "Failed to save image: " + e.getMessage());
+            }
+        }
+    }
+
     
 
     public void showAlert(String title, String message) {

@@ -15,14 +15,16 @@
 	<Button fx:id="convertButton" text="Transfer to IHC" onAction="#handleConvertImage"/>
     <HBox spacing="10">
         <VBox>
+        	<Button fx:id="downloadHeImageBtn" text="Download HE Image" onAction="#handleDownloadHeImage"/>
             <ImageView fx:id="heImageView" fitHeight="300" fitWidth="300" preserveRatio="true"/>
         	<Button fx:id="heShowImageDetails" text="Show the Details" onAction="#showHeImageDetails"/>
        		<TextArea fx:id="heImageDetailsTextArea" editable="false" />
         </VBox>
         <VBox>
+        	<Button fx:id="downloadIhcImageBtn" text="Download IHC Image" onAction="#handleDownloadIhcImage"/>  
             <ImageView fx:id="ihcImageView" fitHeight="300" fitWidth="300" preserveRatio="true"/>
             <Button fx:id="ihcShowImageDetails" text="Show the Details" onAction="#showIhcImageDetails"/>
         	<TextArea fx:id="ihcImageDetailsTextArea" editable="false" />
         </VBox>
-    </HBox><Spinner fx:id="threadSpinner" />
+    </HBox>
 </fx:root>
