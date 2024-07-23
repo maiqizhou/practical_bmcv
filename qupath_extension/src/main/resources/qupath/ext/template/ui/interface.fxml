@@ -5,26 +5,32 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?> 
 <?import javafx.scene.control.TextArea?>
-
-
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SpinnerValueFactory?>
 
-<fx:root type="VBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1">   
-	<Button fx:id="loadImageButton" text="Load HE Image" onAction="#handleLoadImage"/>
-	<Button fx:id="convertButton" text="Transfer to IHC" onAction="#handleConvertImage"/>
-    <HBox spacing="10">
-        <VBox>
-        	<Button fx:id="downloadHeImageBtn" text="Download HE Image" onAction="#handleDownloadHeImage"/>
-            <ImageView fx:id="heImageView" fitHeight="300" fitWidth="300" preserveRatio="true"/>
-        	<Button fx:id="heShowImageDetails" text="Show the Details" onAction="#showHeImageDetails"/>
-       		<TextArea fx:id="heImageDetailsTextArea" editable="false" />
+<fx:root type="VBox" xmlns="http://javafx.com/javafx/20" xmlns:fx="http://javafx.com/fxml/1" spacing="10" fillWidth="true" VBox.vgrow="ALWAYS">   
+    <Button fx:id="loadImageButton" text="Load HE Image" onAction="#handleLoadImage" VBox.vgrow="NEVER"/>
+    <Button fx:id="convertButton" text="Transfer to IHC" onAction="#handleConvertImage" VBox.vgrow="NEVER"/>
+    <Label fx:id="conversionStatusLabel" text="" VBox.vgrow="NEVER"/>
+    <Label fx:id="statusLabel" text="" VBox.vgrow="NEVER"/>
+    <HBox spacing="10" HBox.hgrow="ALWAYS">
+        <VBox VBox.vgrow="ALWAYS">
+            <Button fx:id="downloadHeImageBtn" text="Download HE Image" onAction="#handleDownloadHeImage" VBox.vgrow="NEVER"/>
+            <ScrollPane fx:id="heScrollPane" VBox.vgrow="ALWAYS">
+                <ImageView fx:id="heImageView" fitHeight="300" fitWidth="300" preserveRatio="true"/>
+            </ScrollPane>
+            <Button fx:id="heShowImageDetails" text="Show the Details" onAction="#showHeImageDetails" VBox.vgrow="NEVER"/>
+            <TextArea fx:id="heImageDetailsTextArea" editable="false" VBox.vgrow="ALWAYS"/>
         </VBox>
-        <VBox>
-        	<Button fx:id="downloadIhcImageBtn" text="Download IHC Image" onAction="#handleDownloadIhcImage"/>  
-            <ImageView fx:id="ihcImageView" fitHeight="300" fitWidth="300" preserveRatio="true"/>
-            <Button fx:id="ihcShowImageDetails" text="Show the Details" onAction="#showIhcImageDetails"/>
-        	<TextArea fx:id="ihcImageDetailsTextArea" editable="false" />
+        <VBox VBox.vgrow="ALWAYS">
+            <Button fx:id="downloadIhcImageBtn" text="Download IHC Image" onAction="#handleDownloadIhcImage" VBox.vgrow="NEVER"/>  
+            <ScrollPane fx:id="ihcScrollPane" VBox.vgrow="ALWAYS">
+                <ImageView fx:id="ihcImageView" fitHeight="300" fitWidth="300" preserveRatio="true"/>
+            </ScrollPane>
+            <Button fx:id="ihcShowImageDetails" text="Show the Details" onAction="#showIhcImageDetails" VBox.vgrow="NEVER"/>
+            <TextArea fx:id="ihcImageDetailsTextArea" editable="false" VBox.vgrow="ALWAYS"/>
         </VBox>
     </HBox>
 </fx:root>

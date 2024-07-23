@@ -1,13 +1,20 @@
 package qupath.ext.template.ui;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import qupath.lib.images.servers.ImageServer;
@@ -16,103 +23,115 @@ import qupath.lib.regions.RegionRequest;
 import qupath.ext.template.image.ImageUtils;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Base64;
 import java.util.ResourceBundle;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 
 /**
  * Controller for UI pane contained in interface.fxml
  */
 public class HEtoIHCInterfaceController extends VBox {
-	private static final ResourceBundle resources = ResourceBundle.getBundle("qupath.ext.template.ui.strings");
+    private static final ResourceBundle resources = ResourceBundle.getBundle("qupath.ext.template.ui.strings");
 
+    @FXML
+    private ImageView heImageView;
 
-	@FXML
-	private ImageView heImageView;
+    @FXML
+    private ImageView ihcImageView;
 
-	@FXML
-	private ImageView ihcImageView;
-	
-	@FXML
-	private TextArea heImageDetailsTextArea;
-	
-	@FXML
-	private TextArea ihcImageDetailsTextArea;
+    @FXML
+    private TextArea heImageDetailsTextArea;
+    
+    @FXML
+    private Label conversionStatusLabel;
 
-	private ImageServer<BufferedImage> heImageServer;
-	private ImageServer<BufferedImage> ihcImageServer;
+    @FXML
+    private TextArea ihcImageDetailsTextArea;
+    
+    @FXML
+    private Label statusLabel;
 
-	private File selectedHeImageFile;
+    private ImageServer<BufferedImage> heImageServer;
+    private ImageServer<BufferedImage> ihcImageServer;
+    
+    @FXML
+    private ScrollPane scrollPane;
 
+    private File selectedHeImageFile;
 
-	/**
-	 * Create an instance of InterfaceController
-	 * 
-	 * @return a new instance of InterfaceController
-	 * @throws IOException if the FXML file cannot be loaded
-	 */
-	public static HEtoIHCInterfaceController createInstance() throws IOException {
-		return new HEtoIHCInterfaceController();
-	}
+    /**
+     * Create an instance of InterfaceController
+     *
+     * @return a new instance of InterfaceController
+     * @throws IOException if the FXML file cannot be loaded
+     */
+    public static HEtoIHCInterfaceController createInstance() throws IOException {
+        return new HEtoIHCInterfaceController();
+    }
 
-	/**
-	 * Private constructor to initialize the controller and load the FXML file
-	 * 
-	 * @throws IOException if the FXML file cannot be loaded
-	 */
-	public HEtoIHCInterfaceController() throws IOException {
-		var url = HEtoIHCInterfaceController.class.getResource("interface.fxml");
-		FXMLLoader loader = new FXMLLoader(url, resources);
-		loader.setRoot(this);
-		loader.setController(this);
-		loader.load();
+    /**
+     * Private constructor to initialize the controller and load the FXML file
+     *
+     * @throws IOException if the FXML file cannot be loaded
+     */
+    public HEtoIHCInterfaceController() throws IOException {
+        var url = HEtoIHCInterfaceController.class.getResource("interface.fxml");
+        FXMLLoader loader = new FXMLLoader(url, resources);
+        loader.setRoot(this);
+        loader.setController(this);
+        loader.load();
+    }
 
-		// Bind the spinner value to the number of threads property in DemoExtension
-//		threadSpinner.getValueFactory().valueProperty().bindBidirectional(HEtoIHCExtension.numThreadsProperty());
-//		threadSpinner.getValueFactory().valueProperty().addListener((observableValue, oldValue, newValue) -> {
-//			Dialogs.showInfoNotification(resources.getString("title"),
-//					String.format(resources.getString("threads"), newValue));
-//		});
-	}
-
-
-	/**
-	 * Method to load the HE image
-	 */
+    /**
+     * Method to load the HE image
+     */
     @FXML
     private void handleLoadImage(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
-            new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.tif", "*.tiff")
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg")
         );
         selectedHeImageFile = fileChooser.showOpenDialog(null);
 
         if (selectedHeImageFile != null) {
+            
+            ImageUtils.checkImageFormat(selectedHeImageFile.getAbsolutePath());
+            if (selectedHeImageFile == null) {
+                return; 
+            }
+
             try (FileInputStream fileInputStream = new FileInputStream(selectedHeImageFile)) {
                 Image heImage = new Image(fileInputStream);
                 heImageView.setImage(heImage);
+                addDragAndZoomFunctionality(heImageView);
                 ihcImageView.setImage(null); // Clear the IHC image view
+                conversionStatusLabel.setText("");
             } catch (IOException e) {
                 showAlert("Error", "Failed to load image: " + e.getMessage());
             }
-            
-            ImageServer<BufferedImage> server;
-			try {
-				server = ImageServerProvider.buildServer(selectedHeImageFile.getAbsolutePath(), BufferedImage.class);
-				heImageServer = server;
-			} catch (IOException e) {
-				// Auto-generated catch block
-				e.printStackTrace();
-			}
-            
+
+            try {
+                heImageServer = ImageServerProvider.buildServer(selectedHeImageFile.getAbsolutePath(), BufferedImage.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
+
     /**
-	 * Method to convert image
-	 */
+     * Method to convert image
+     */
     @FXML
-	private void handleConvertImage(ActionEvent event) {
+    private void handleConvertImage(ActionEvent event) {
         if (selectedHeImageFile != null) {
             convertToIHC(selectedHeImageFile);
         } else {
@@ -120,51 +139,78 @@ public class HEtoIHCInterfaceController extends VBox {
         }
     }
 
-
     public void convertToIHC(File heImageFile) {
-        try {
-            // Path to the Python script
-            String pythonScriptPath = "/Users/maggie/Downloads/BCI-main/transform_test.py";
+        // Set the conversionStatusLabel to "Conversion in progress" immediately
+        Platform.runLater(() -> conversionStatusLabel.setText("Conversion in progress"));
 
-            // Command to run the Python script
-            ProcessBuilder processBuilder = new ProcessBuilder("/Users/maggie/anaconda3/bin/python", pythonScriptPath, heImageFile.getAbsolutePath());
-            processBuilder.redirectErrorStream(true);
+        new Thread(() -> {
+            try {
+                // Path to the Python script
+                String pythonScriptPath = "/Users/maggie/practical_bmcv/transform_test.py";
 
-            Process process = processBuilder.start();
-            process.waitFor();
+                // Command to run the Python script
+                ProcessBuilder processBuilder = new ProcessBuilder(
+                    "/Users/maggie/anaconda3/bin/python",
+                    pythonScriptPath,
+                    heImageFile.getAbsolutePath()
+                );
+                processBuilder.redirectErrorStream(true);
 
-            // Assume the Python script saves the converted IHC image to a predefined location
-            File ihcImageFile = new File("/Users/maggie/Downloads/BCI-main/ihc_image.png");
-
-            // Load the converted IHC image
-            if (ihcImageFile.exists()) {
-                try (FileInputStream fileInputStream = new FileInputStream(ihcImageFile)) {
-                    Image ihcImage = new Image(fileInputStream);
-                    ihcImageView.setImage(ihcImage);
+                Process process = processBuilder.start();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line;
+                String lastLine = null;
+                while ((line = reader.readLine()) != null) {
+                    final String status = line;
+                    // Regular expression to check if a string might be Base64
+                    if (!status.matches("^[a-zA-Z0-9/+]*={0,2}$")) {
+                        Platform.runLater(() -> statusLabel.setText(""));
+                    }
+                    lastLine = line;
                 }
-                try {
-                    ihcImageServer = ImageServerProvider.buildServer(ihcImageFile.getAbsolutePath(), BufferedImage.class); 
-                } catch (IOException e) {
-                    e.printStackTrace();
+                process.waitFor();
+
+                // The last line should be the Base64 string
+                String ihcImageBase64 = lastLine;
+                byte[] imageBytes = Base64.getDecoder().decode(ihcImageBase64);
+
+                // Save the decoded image to a temporary file
+                File tempFile = File.createTempFile("ihcImage", ".png");
+                try (OutputStream out = new FileOutputStream(tempFile)) {
+                    out.write(imageBytes);
                 }
 
-                
-                
-            } else {
-                showAlert("Error", "Converted IHC image not found");
+                // Create a new ImageServer that loads the temporary file
+                ihcImageServer = ImageServerProvider.buildServer(tempFile.toURI().toString(), BufferedImage.class);
+
+                try (InputStream in = new ByteArrayInputStream(imageBytes)) {
+                    Image ihcImage = new Image(in);
+                    Platform.runLater(() -> {
+                        ihcImageView.setImage(ihcImage);
+                        // Add zoom functionality
+                        addDragAndZoomFunctionality(ihcImageView);
+                        // Set the conversionStatusLabel to "Conversion completed"
+                        conversionStatusLabel.setText("Conversion completed");
+                    });
+                }
+            } catch (IOException | InterruptedException e) {
+                Platform.runLater(() -> showAlert("Error", "Failed to convert image: " + e.getMessage()));
             }
-        } catch (IOException | InterruptedException e) {
-            showAlert("Error", "Failed to convert image: " + e.getMessage());
-        }
+        }).start();
     }
-    
+
+
+
+
+
+
     /**
-   	 * Method to show details of the image
-   	 */
+     * Method to show details of the image
+     */
     @FXML
     private void showHeImageDetails(ActionEvent event) {
         if (heImageView.getImage() != null) {
-        	String imageDetails = "HE Image:\n" + ImageUtils.getImageDetails(heImageServer);
+            String imageDetails = "HE Image:\n" + ImageUtils.getImageDetails(heImageServer);
             heImageDetailsTextArea.setText(imageDetails);
         } else {
             heImageDetailsTextArea.setText("");
@@ -180,9 +226,9 @@ public class HEtoIHCInterfaceController extends VBox {
             ihcImageDetailsTextArea.setText("No IHC image to show details.");
         }
     }
-    
+
     @SuppressWarnings("deprecation")
-	@FXML
+    @FXML
     private void handleDownloadHeImage(ActionEvent event) {
         if (heImageServer == null) {
             showAlert("Error", "No HE image loaded to save.");
@@ -206,7 +252,7 @@ public class HEtoIHCInterfaceController extends VBox {
     }
 
     @SuppressWarnings("deprecation")
-	@FXML
+    @FXML
     private void handleDownloadIhcImage(ActionEvent event) {
         if (ihcImageServer == null) {
             showAlert("Error", "No IHC image loaded to save.");
@@ -229,8 +275,48 @@ public class HEtoIHCInterfaceController extends VBox {
         }
     }
 
-    
+    public void addDragAndZoomFunctionality(ImageView imageView) {
+        // Add drag functionality
+        imageView.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                // Record the current mouse position
+                imageView.setUserData(new Point2D(event.getX(), event.getY()));
+            }
+        });
 
+        imageView.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                // Calculate the mouse movement
+                Point2D oldMousePosition = (Point2D) imageView.getUserData();
+                double deltaX = event.getX() - oldMousePosition.getX();
+                double deltaY = event.getY() - oldMousePosition.getY();
+
+                // Update the ImageView position
+                imageView.setTranslateX(imageView.getTranslateX() + deltaX);
+                imageView.setTranslateY(imageView.getTranslateY() + deltaY);
+
+                // Update the recorded mouse position
+                imageView.setUserData(new Point2D(event.getX(), event.getY()));
+            }
+        });
+
+        // Add zoom functionality
+        imageView.setOnScroll(new EventHandler<ScrollEvent>() {
+            @Override
+            public void handle(ScrollEvent event) {
+                double zoomFactor = 1.05;
+                double deltaY = event.getDeltaY();
+                if (deltaY < 0) {
+                    zoomFactor = 1 / zoomFactor;
+                }
+                imageView.setScaleX(imageView.getScaleX() * zoomFactor);
+                imageView.setScaleY(imageView.getScaleY() * zoomFactor);
+                event.consume();
+            }
+        });
+    }
     public void showAlert(String title, String message) {
         Alert alert = new Alert(AlertType.ERROR);
         alert.setTitle(title);
@@ -239,4 +325,3 @@ public class HEtoIHCInterfaceController extends VBox {
         alert.showAndWait();
     }
 }
-
